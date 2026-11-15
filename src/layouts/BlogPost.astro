@@ -1,0 +1,42 @@
+---
+import Layout from "@layouts/Layout.astro";
+import FormattedDate from "@components/FormattedDate.astro";
+
+type Props = {
+  title: string;
+  description?: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+};
+
+const { title, description, pubDate, updatedDate, tags = [] } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <div class="title">
+    <h1>{title}</h1>
+        <ul class="tags">
+          <li>📅 <FormattedDate date={pubDate} /></li>
+          {tags.length > 0 && tags
+            .sort((left: string, right: string) => left.localeCompare(right))
+            .map((e) => (
+              <li>{`#${e}`}</li>
+            ))}
+        </ul>
+    <hr />
+  </div>
+  <!-- <blockquote>{description}</blockquote> -->
+  <slot />
+  <hr />
+  <div class="date">
+    Published on <FormattedDate date={pubDate} long />
+    {
+      updatedDate && (
+        <>
+          {" - "}Last updated on <FormattedDate date={updatedDate} long />
+        </>
+      )
+    }
+  </div>
+</Layout>

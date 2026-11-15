@@ -1,0 +1,65 @@
+---
+import "@styles/list.css";
+import { Image } from "astro:assets";
+import { getCollection, getEntry } from "astro:content";
+import { SITE_TITLE } from "@/consts";
+import Layout from "@layouts/Layout.astro";
+import FormattedDate from "@components/FormattedDate.astro";
+import { blog_categories as categories } from "@/consts";
+
+import type { CollectionKey } from "astro:content";
+
+export async function getStaticPaths() {
+  return categories.map((c) => ({
+    params: { category: c.category },
+  }));
+}
+
+const { category } = Astro.params;
+
+const collection = categories.find((c) => c.category == category)?.collection;
+const title = categories.find((c) => c.category == category)?.title;
+
+const posts = (await getCollection(collection as CollectionKey))
+  .filter((e) => e.data.draft != true)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<Layout title={[SITE_TITLE, title].join(": ")}>
+  <section>
+    <h1>{title}</h1>
+    <ul class="category-posts">
+      {
+        posts.map((post) => (
+          <li>
+            <a href={`/read/${category}/${post.id}/`}>
+              {post.data.heroImage && (
+                <Image
+                  width={720}
+                  height={360}
+                  src={post.data.heroImage}
+                  alt=""
+                />
+              )}
+              <h4 class="title">{post.data.title}</h4>
+              {"tags" in post.data && (
+                <ul class="tags">
+                  {post.data.tags
+                    ?.sort((left: string, right: string) =>
+                      left.localeCompare(right),
+                    )
+                    .map((tag) => (
+                      <li>#{tag}</li>
+                    ))}
+                </ul>
+              )}
+              <p class="date">
+                <FormattedDate date={post.data.pubDate} />
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Layout>

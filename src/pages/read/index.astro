@@ -1,0 +1,39 @@
+---
+import "@styles/list.css";
+import Layout from "@layouts/Layout.astro";
+import { SITE_TITLE, blog_categories } from "@/consts";
+---
+
+<Layout title={[SITE_TITLE, "Games"].join(": ")}>
+  <section>
+    <h1>Blog categories</h1>
+    <ul>
+      {
+        blog_categories.map((category) => {
+          return (
+            <li>
+              <a href={`/read/${category.category}/`}>
+                <h4 class="title">{category.title}</h4>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+</Layout>
+
+<style>
+  ul {
+    /* list-style: none; */
+
+    a {
+      text-decoration: none;
+    }
+
+    /* list-style: none; */
+    /* padding: 25px; */
+    /* display: flex; */
+    /* flex-direction: column; */
+  }
+</style>

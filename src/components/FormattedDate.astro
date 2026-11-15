@@ -1,0 +1,24 @@
+---
+import { DateTime } from "luxon";
+
+interface Props {
+  date: Date;
+  long?: boolean;
+  tz?: string;
+}
+
+const { date, long = false, tz = "UTC" } = Astro.props;
+const dt = DateTime.fromJSDate(date);
+---
+
+<time datetime={dt.toISO()}>
+  {
+    (long &&
+      dt.toLocaleString({
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })) ||
+      dt.toISODate()?.replaceAll("-", "/")
+  }
+</time>

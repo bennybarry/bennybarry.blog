@@ -1,0 +1,50 @@
+---
+import { type CollectionKey, getCollection, render } from "astro:content";
+import NestedTableOfContents from "@components/NestedTableOfContents";
+import BlogPost from "@/layouts/BlogPost.astro";
+import {blog_categories as categories, type ICategory} from "@/consts";
+
+
+
+export async function getStaticPaths() {
+  const paths = await Promise.all(
+    categories.map(async (c: ICategory) => {
+      const posts = await getCollection(c.collection as CollectionKey);
+
+      return posts.map((post) => ({
+        params: {
+          category: c.category,
+          slug: post.id,
+        },
+      }));
+    }),
+  );
+
+  return paths.flat();
+}
+
+const { category, slug } = Astro.params;
+const collection = categories.find((c) => c.category == category)?.collection;
+
+if (!category || !slug || !collection) {
+  return Astro.redirect("/404");
+}
+
+const posts = await getCollection(collection as CollectionKey);
+const post = posts.find((entry) => entry.id === slug);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+const { Content, headings } = await render(post);
+---
+
+<BlogPost {...(post.data as Object)}>
+  <div class="sticky-toc">
+    <NestedTableOfContents headings={headings} />
+  </div>
+  <article>
+    <Content />
+  </article>
+</BlogPost>

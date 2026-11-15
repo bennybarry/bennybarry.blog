@@ -1,0 +1,53 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import FormattedDate from "@components/FormattedDate.astro";
+import { blog_categories } from "@/consts";
+import type { CollectionKey } from "astro:content";
+
+
+const blog_posts = (
+  await Promise.all(
+    blog_categories.map(async (c) =>
+      (await getCollection(c.collection as CollectionKey))
+        .filter((p) => "draft" in (p.data as Object) && !p.data.draft)
+        .map((post) => ({
+          ...post,
+          data: post.data,
+          link: `/read/${c.category}}/${post.id}/`,
+        })),
+    ),
+  )
+)
+  .filter((e) => e.length > 0)
+  .flat();
+
+const posts = [ ...blog_posts]
+  .filter(
+    (e) => e.data != undefined && "draft" in e.data && e.data.draft != true,
+  )
+  .sort(
+    (left, right) => right.data.pubDate.getTime() - left.data.pubDate.getTime(),
+  );
+---
+
+<Layout>
+  <h1>Who writes a blog anymore?!</h1>
+
+  <p>
+    It appears that I'm doing so.
+  </p>
+
+    <h2>What's I've been up to?</h2>
+    <ul>
+      {
+        posts.map((post) => (
+          <li>
+            <a href={`/${post.url}/`}>
+              {post.data.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+</Layout>
